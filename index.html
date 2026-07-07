@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -144,7 +144,6 @@ import {
   getDatabase, ref, push, get, update, remove, onValue, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// ---- Your Firebase config ----
 const firebaseConfig = {
   apiKey: "AIzaSyAgiXTs87Yk_ObicjusvcaBy84NJUWwUyM",
   authDomain: "exchange-board-3f15d.firebaseapp.com",
@@ -162,7 +161,6 @@ const LIKES_PER_PASS = 10;
 const LIKES_TO_GRADUATE = 10;
 const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
 
-// ---- Identify this browser/user (stored locally, no login needed) ----
 function getMyId() {
   let id = localStorage.getItem('exchange-my-id');
   if (!id) {
@@ -236,7 +234,6 @@ function renderBoard() {
   });
 }
 
-// ---- Real-time listeners ----
 const statusBanner = document.getElementById('statusBanner');
 
 onValue(ref(db, 'videos'), (snapshot) => {
@@ -249,29 +246,28 @@ onValue(ref(db, 'videos'), (snapshot) => {
 });
 
 onValue(ref(db, 'users/' + myId), (snapshot) => {
-  myProgress = snapshot.val() || { likesGiven: 0, pointsSpent: 0 };
+  const data = snapshot.val() || {};
+  myProgress = { likesGiven: data.likesGiven || 0, pointsSpent: data.pointsSpent || 0 };
   renderPass();
 }, (error) => {
   statusBanner.style.border = '1px solid #C1594F';
   statusBanner.textContent = 'ERROR: ' + error.message;
 });
 
-// ---- Like a video ----
 async function handleLike(videoId) {
   const videoRef = ref(db, 'videos/' + videoId);
 
   const result = await runTransaction(videoRef, (video) => {
-    if (!video) return video; // already removed by someone else
-    if (video.likedBy && video.likedBy[myId]) return; // abort, already liked
+    if (!video) return video;
+    if (video.likedBy && video.likedBy[myId]) return;
     video.likes = (video.likes || 0) + 1;
     video.likedBy = video.likedBy || {};
     video.likedBy[myId] = true;
     return video;
   });
 
-  if (!result.committed) return; // someone already liked it or it's gone
+  if (!result.committed) return;
 
-  // bump my likesGiven counter
   await runTransaction(ref(db, 'users/' + myId + '/likesGiven'), (n) => (n || 0) + 1);
 
   const updatedVideo = result.snapshot.val();
@@ -286,7 +282,6 @@ document.getElementById('board').addEventListener('click', (e) => {
   if (btn && !btn.disabled) handleLike(btn.dataset.id);
 });
 
-// ---- Submit a new video ----
 document.getElementById('submitForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const input = document.getElementById('videoLink');
@@ -311,4 +306,4 @@ document.getElementById('submitForm').addEventListener('submit', async (e) => {
 });
 </script>
 </body>
-</html>                  
+</html>
