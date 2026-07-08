@@ -17,10 +17,31 @@
     --line: #363C48;
     --danger: #C1594F;
   }
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background: linear-gradient(135deg,#0f172a,#111827,#1e293b);
+}
+
+.wrap{
+  background: rgba(255,255,255,.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+
+
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--ink);
+    background: linear-gradient(135deg,#0f172a,#111827,#1e293b);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
@@ -123,8 +144,12 @@
 
     <header>
       <div>
-        <h1>Jh Digital Service</h1>
-        <div class="tagline">10 likes given = 1 pass. 1 pass = your video goes on the board.</div>
+        <h1>JH DIGITAL SERVICE</h1>
+
+<div class="tagline">
+Professional Video Exchange Platform • Earn Passes • Grow Faster
+</div>
+
       </div>
       <div class="pass">
         <div class="pass-label">Your Pass</div>
