@@ -94,6 +94,29 @@ body{
   .req-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; gap: 10px; }
   .req-row:last-child { border-bottom: none; }
   .logout-link { color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; }
+  header h1{
+    font-size:42px;
+    font-weight:900;
+    background:linear-gradient(90deg,#00e5ff,#00ff95);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.ticket,
+.card{
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+    transition:.3s;
+}
+
+.ticket:hover,
+.card:hover{
+    transform:translateY(-4px);
+}
+
+button{
+    border-radius:12px;
+}
 </style>
 </head>
 <body>
