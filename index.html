@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JH Digital Service</title>
+<title>JH Digital Service — Grow Your Social Media Faster</title>
+<meta name="description" content="JH Digital Service helps you grow your TikTok and YouTube videos through a fair like-exchange board. Exchange likes, earn passes, and promote your videos.">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <style>
   :root {
     --bg: #0c0716;
@@ -77,7 +80,8 @@
     padding: 16px 32px; flex-wrap: wrap; gap: 12px;
     animation: fadeInUp 0.6s ease both;
   }
-  .brand { font-weight: 900; font-size: 17px; letter-spacing: 0.3px; }
+  .brand { font-weight: 900; font-size: 17px; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+  .brand-logo { height: 34px; width: 34px; object-fit: cover; border-radius: 8px; }
   .nav-links { display: flex; gap: 26px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
   .nav-links a:hover { color: var(--text); }
 
@@ -229,7 +233,7 @@
 </div>
 
 <nav>
-  <div class="brand">🚀 JH DIGITAL SERVICE</div>
+  <div class="brand"><img src="logo.png" alt="JH Digital Service" class="brand-logo"> JH DIGITAL SERVICE</div>
   <div class="nav-links">
     <a href="#top">Home</a>
     <a href="#board">Exchange</a>
@@ -269,6 +273,8 @@
   <div class="panel-card"><div id="pendingList"></div></div>
   <div class="panel-title" style="margin-top:24px;">Recent Likes (Spot-Check)</div>
   <div class="panel-card"><div id="recentLikesList"></div></div>
+  <div class="panel-title" style="margin-top:24px;">All Users</div>
+  <div class="panel-card"><div id="allUsersList"></div></div>
 </section>
 
 <section class="panel" id="board">
@@ -295,7 +301,7 @@
 
 <footer id="footer">
   <div>
-    <div class="brand" style="margin-bottom:10px;">🚀 JH DIGITAL SERVICE</div>
+    <div class="brand" style="margin-bottom:10px;"><img src="logo.png" alt="JH Digital Service" class="brand-logo"> JH DIGITAL SERVICE</div>
     <p>We help you grow your social media with real likes, real people, real results.</p>
   </div>
   <div>
@@ -405,7 +411,9 @@ const LIKES_TO_GRADUATE = 10;
 const TRIAL_DAYS = 7;
 const SUB_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
+const ADMIN_EMAIL = "jasimphone31@gmail.com";
+const adminRequested = new URLSearchParams(location.search).get('admin') === '1';
+let isAdmin = false;
 
 const statusBanner = document.getElementById('statusBanner');
 const el = (id) => document.getElementById(id);
@@ -500,7 +508,11 @@ function renderPendingRequests(requests) {
   });
 }
 
-if (isAdmin) {
+let adminPanelSetup = false;
+function setupAdminPanel() {
+  if (adminPanelSetup) return;
+  adminPanelSetup = true;
+
   el('adminPanelSection').style.display = 'block';
   onValue(ref(db, 'subscriptionRequests'), (snap) => renderPendingRequests(snap.val() || {}));
   el('pendingList').addEventListener('click', async (e) => {
@@ -534,8 +546,35 @@ if (isAdmin) {
       list.appendChild(row);
     });
   }
-  onValue(ref(db, 'accounts'), (snap) => { accountsCache = snap.val() || {}; renderRecentLikes(); });
+  onValue(ref(db, 'accounts'), (snap) => { accountsCache = snap.val() || {}; renderRecentLikes(); renderAllUsers(); });
   onValue(ref(db, 'likeLog'), (snap) => { likeLogCache = snap.val() || {}; renderRecentLikes(); });
+
+  function renderAllUsers() {
+    const list = el('allUsersList');
+    const entries = Object.entries(accountsCache).sort((a, b) => (b[1].createdAt||0) - (a[1].createdAt||0));
+    if (entries.length === 0) {
+      list.innerHTML = '<div class="hint">No users yet.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    const now = Date.now();
+    entries.forEach(([uid, acc]) => {
+      const trialEnd = (acc.createdAt || 0) + TRIAL_DAYS * DAY_MS;
+      const inTrial = now < trialEnd;
+      const subActive = acc.subscriptionActive && now < acc.subscriptionExpiry;
+      let status;
+      if (subActive) status = `Subscribed (until ${new Date(acc.subscriptionExpiry).toLocaleDateString()})`;
+      else if (inTrial) status = `Trial (${Math.ceil((trialEnd - now) / DAY_MS)}d left)`;
+      else status = 'Expired / Not subscribed';
+      const row = document.createElement('div');
+      row.className = 'req-row';
+      row.innerHTML = `
+        <span>${acc.email}<br><span class="hint">Joined: ${new Date(acc.createdAt).toLocaleDateString()}</span></span>
+        <span class="hint" style="text-align:right;">${status}</span>
+      `;
+      list.appendChild(row);
+    });
+  }
 
   el('recentLikesList').addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-log]');
@@ -617,9 +656,13 @@ function setGates(mode) {
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
+    isAdmin = false;
     setGates('loggedOut');
     return;
   }
+  isAdmin = adminRequested && user.email === ADMIN_EMAIL;
+  if (isAdmin) setupAdminPanel();
+
   onValue(ref(db, 'accounts/' + user.uid), (snap) => {
     const acc = snap.val();
     if (!acc) return;
