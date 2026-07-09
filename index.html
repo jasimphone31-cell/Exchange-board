@@ -360,6 +360,13 @@ box-shadow:0 0 25px rgba(255,46,154,.5);">
     </div>
     <input type="text" id="txnId" placeholder="Transaction ID / TXN number" />
     <button class="btn-gradient" id="submitTxn" style="width:100%;">Submit for Approval</button>
+    <button
+  id="submitTxn"
+  class="btn-gradient"
+  onclick="verifyPayment()"
+  style="width:100%;">
+  📲 Verify Payment on WhatsApp
+    </button>
     <p class="hint" id="txnStatus"></p>
     <p style="margin-top:14px;"><span class="logout-link" id="lockLogout">Log out</span></p>
   </div>
