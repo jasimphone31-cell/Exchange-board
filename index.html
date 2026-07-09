@@ -20,28 +20,52 @@
     --danger: #ff5c7a;
   }
   * { box-sizing: border-box; }
+  @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+  @keyframes rocketTilt { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-22px) rotate(3deg); } }
+  @keyframes fadeInUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px rgba(255,46,154,0.25), 0 0 40px rgba(139,62,232,0.15); } 50% { box-shadow: 0 0 32px rgba(255,46,154,0.45), 0 0 60px rgba(139,62,232,0.3); } }
+  @keyframes particleDrift { 0% { transform: translateY(0) translateX(0); opacity:0.6; } 50% { opacity:1; } 100% { transform: translateY(-140px) translateX(20px); opacity:0; } }
+  @keyframes textGlowPulse { 0%,100% { filter: drop-shadow(0 0 12px rgba(255,46,154,0.6)) drop-shadow(0 0 24px rgba(62,198,255,0.3)); } 50% { filter: drop-shadow(0 0 22px rgba(255,46,154,0.9)) drop-shadow(0 0 40px rgba(62,198,255,0.5)); } }
+
   body {
     margin: 0;
-    background: radial-gradient(circle at 20% 0%, #241238 0%, var(--bg) 55%);
+    background: radial-gradient(circle at 15% -5%, #3a1856 0%, transparent 45%),
+                radial-gradient(circle at 85% 10%, #1a2d5c 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, #2a0f42 0%, transparent 50%),
+                var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
   }
+  .particle-field { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; border-radius: 50%; background: radial-gradient(circle, var(--pink-2), transparent 70%);
+    animation: particleDrift linear infinite;
+  }
+  .particle:nth-child(2n) { background: radial-gradient(circle, var(--blue), transparent 70%); }
+  body > *:not(.particle-field) { position: relative; z-index: 1; }
   a { text-decoration: none; color: inherit; }
   .grad-text {
     background: linear-gradient(90deg, var(--pink) 0%, var(--violet) 60%, var(--blue) 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+  .neon-text { animation: textGlowPulse 3s ease-in-out infinite; }
   .btn-gradient {
     background: linear-gradient(90deg, var(--pink), var(--blue));
     color: #0c0716; border: none; border-radius: 10px; padding: 13px 22px;
     font-weight: 800; font-size: 14px; cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
   .btn-gradient:disabled { opacity: 0.5; cursor: default; }
+  .btn-hover-glow:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 28px rgba(255,46,154,0.5), 0 0 40px rgba(62,198,255,0.3); }
   .btn-outline {
     background: transparent; border: 1px solid var(--pink); color: var(--pink-2);
     border-radius: 20px; padding: 8px 18px; font-weight: 700; font-size: 13px; cursor: pointer;
+    transition: all 0.25s ease;
   }
+  .btn-outline:hover { background: rgba(255,46,154,0.12); box-shadow: 0 0 16px rgba(255,46,154,0.35); }
 
   .topbar {
     background: linear-gradient(90deg, var(--pink), var(--violet));
@@ -51,6 +75,7 @@
   nav {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px 32px; flex-wrap: wrap; gap: 12px;
+    animation: fadeInUp 0.6s ease both;
   }
   .brand { font-weight: 900; font-size: 17px; letter-spacing: 0.3px; }
   .nav-links { display: flex; gap: 26px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
@@ -60,52 +85,72 @@
     max-width: 1100px; margin: 20px auto 10px; padding: 20px 32px;
     display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center;
   }
+  .hero-content { animation: fadeInUp 0.8s ease both; }
+  .hero-side { animation: fadeInUp 0.8s ease 0.15s both; text-align: center; }
   .hero h1 { font-size: 40px; font-weight: 900; margin: 0 0 8px; line-height: 1.05; }
   .hero-sub { font-size: 16px; color: var(--muted); margin: 6px 0 4px; }
   .hero-tag { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .rocket-emoji { font-size: 80px; text-align: center; filter: drop-shadow(0 0 30px rgba(255,46,154,0.5)); }
+  .rocket-emoji { font-size: 80px; filter: drop-shadow(0 0 30px rgba(255,46,154,0.5)); }
+  .rocket-float { animation: rocketTilt 3.5s ease-in-out infinite; display: inline-block; }
 
+  .glass-card {
+    background: rgba(26,16,48,0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid var(--pink);
+    animation: pulseGlow 3.5s ease-in-out infinite;
+  }
   .pass-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-    padding: 18px 22px; text-align: center; box-shadow: 0 0 40px rgba(139,62,232,0.25);
+    border-radius: 16px; padding: 18px 22px; text-align: center; margin-top: 18px;
   }
   .pass-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
   .pass-value { font-size: 40px; font-weight: 900; background: linear-gradient(90deg,var(--pink),var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent; margin: 4px 0; }
   .pass-sub { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .progress-track { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg,var(--pink),var(--blue)); transition: width 0.4s ease; }
+  .progress-track { height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg,var(--pink),var(--blue)); transition: width 0.4s ease; box-shadow: 0 0 10px rgba(255,46,154,0.6); }
 
   .stats-bar {
     max-width: 1100px; margin: 10px auto; padding: 0 32px;
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    animation: fadeInUp 0.8s ease 0.3s both;
   }
   .stat-card {
     background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; display: flex; align-items: center; gap: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
-  .stat-icon { font-size: 20px; }
+  .glow-card:hover { transform: translateY(-4px); box-shadow: 0 0 24px rgba(139,62,232,0.4); border-color: var(--violet); }
+  .stat-icon { font-size: 22px; }
   .stat-label { font-size: 11px; color: var(--muted); }
-  .stat-value { font-size: 20px; font-weight: 800; }
+  .stat-value { font-size: 21px; font-weight: 800; }
 
   section.panel {
     max-width: 1100px; margin: 26px auto; padding: 0 32px;
+    animation: fadeInUp 0.8s ease both;
   }
   .panel-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--pink-2); font-weight: 700; margin-bottom: 14px; }
-  .panel-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .panel-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: 0 0 30px rgba(139,62,232,0.1); }
 
   .row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 0; border-bottom: 1px solid var(--line); gap: 14px; flex-wrap: wrap;
+    padding: 14px 4px; border-bottom: 1px solid var(--line); gap: 14px; flex-wrap: wrap;
+    transition: background 0.2s ease;
   }
+  .row:hover { background: rgba(255,46,154,0.04); border-radius: 10px; }
   .row:last-child { border-bottom: none; }
   .row-link { font-size: 13px; word-break: break-all; flex: 1; min-width: 180px; }
   .row-link:hover { color: var(--pink-2); }
   .row-right { display: flex; align-items: center; gap: 14px; }
   .tag-liked { background: rgba(62,198,255,0.15); color: var(--blue); border: 1px solid var(--blue); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
-  .tag-like { background: linear-gradient(90deg,var(--pink),var(--violet)); color: #fff; border: none; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .tag-like {
+    background: linear-gradient(90deg,var(--pink),var(--violet)); color: #fff; border: none;
+    border-radius: 20px; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 0 14px rgba(255,46,154,0.4); transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .tag-like:hover { transform: scale(1.06); box-shadow: 0 0 22px rgba(255,46,154,0.65); }
   .tag-locked { background: var(--card-2); color: var(--muted); border: 1px solid var(--line); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
-  .mini-progress { width: 90px; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
-  .mini-progress-fill { height: 100%; background: linear-gradient(90deg,var(--pink),var(--blue)); }
+  .mini-progress { width: 100px; height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .mini-progress-fill { height: 100%; background: linear-gradient(90deg,var(--pink),var(--blue)); box-shadow: 0 0 8px rgba(255,46,154,0.5); }
   .count-text { font-size: 12px; color: var(--muted); font-family: monospace; min-width: 44px; text-align: right; }
   .empty-row { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
 
@@ -137,16 +182,18 @@
   .req-row:last-child { border-bottom: none; }
 
   footer {
-    max-width: 1100px; margin: 40px auto 0; padding: 30px 32px;
+    max-width: 1100px; margin: 40px auto 0; padding: 34px 32px;
     border-top: 1px solid var(--line);
+    background: radial-gradient(circle at 10% 0%, rgba(255,46,154,0.06), transparent 60%);
     display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 20px; font-size: 13px; color: var(--muted);
   }
-  footer h4 { color: var(--text); font-size: 13px; margin-bottom: 10px; }
-  footer a { display: block; margin-bottom: 6px; color: var(--muted); }
-  footer a:hover { color: var(--pink-2); }
+  footer h4 { color: var(--text); font-size: 13px; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,46,154,0.4); }
+  footer a { display: block; margin-bottom: 8px; color: var(--muted); transition: color 0.2s ease, text-shadow 0.2s ease; }
+  footer a:hover { color: var(--pink-2); text-shadow: 0 0 8px rgba(255,46,154,0.6); }
   .footer-bottom {
     max-width: 1100px; margin: 0 auto; padding: 16px 32px 30px; display: flex;
     justify-content: space-between; font-size: 12px; color: var(--muted); flex-wrap: wrap; gap: 10px;
+    border-top: 1px solid var(--line);
   }
 
   .toast {
@@ -158,12 +205,22 @@
   .toast.show { opacity: 1; }
 
   @media (max-width: 750px) {
-    .hero { grid-template-columns: 1fr; }
-    footer { grid-template-columns: 1fr 1fr; }
+    nav { padding: 14px 18px; }
+    .hero { grid-template-columns: 1fr; padding: 16px 18px; gap: 20px; text-align: center; }
+    .hero h1 { font-size: 32px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 0 18px; }
+    section.panel { padding: 0 18px; }
+    footer { grid-template-columns: 1fr 1fr; padding: 28px 18px; }
+    .footer-bottom { padding: 14px 18px 26px; justify-content: center; text-align: center; }
+    .row { padding: 12px 2px; }
+    .video-form-row { flex-direction: column; }
+    .video-form-row input { min-width: 0; }
   }
 </style>
 </head>
 <body>
+
+<div class="particle-field" id="particleField"></div>
 
 <div class="topbar" id="trialTopbar" style="display:none;"></div>
 
@@ -183,27 +240,28 @@
 </nav>
 
 <section class="hero" id="top">
-  <div>
-    <h1>JH DIGITAL<br><span class="grad-text">SERVICE</span></h1>
+  <div class="hero-content">
+    <h1>JH DIGITAL<br><span class="grad-text neon-text">SERVICE</span></h1>
     <p class="hero-sub">Grow Your Social Media Faster 🚀</p>
     <p class="hero-tag">Exchange Likes • Earn Passes • Promote Videos</p>
-    <button class="btn-gradient" id="getStartedBtn">Get Started ↗</button>
+    <button class="btn-gradient btn-hover-glow" id="getStartedBtn">Get Started ↗</button>
   </div>
-  <div>
-    <div class="rocket-emoji">🚀</div>
+  <div class="hero-side">
+    <div class="rocket-emoji rocket-float">🚀</div>
+    <div class="pass-card glass-card">
+      <div class="pass-label">Your Pass</div>
+      <div class="pass-value" id="pointsDisplay">0</div>
+      <div class="pass-sub" id="progressText">0 / 10 likes given</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
   </div>
 </section>
 
 <div class="stats-bar">
-  <div class="pass-card" style="grid-column: span 1;">
-    <div class="pass-label">Your Pass</div>
-    <div class="pass-value" id="pointsDisplay">0</div>
-    <div class="pass-sub" id="progressText">0 / 10 likes given</div>
-    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-  </div>
-  <div class="stat-card"><span class="stat-icon">👥</span><div><div class="stat-label">Total Users</div><div class="stat-value" id="statUsers">–</div></div></div>
-  <div class="stat-card"><span class="stat-icon">▶️</span><div><div class="stat-label">Videos Boosted</div><div class="stat-value" id="statVideos">–</div></div></div>
-  <div class="stat-card"><span class="stat-icon">❤️</span><div><div class="stat-label">Likes Delivered</div><div class="stat-value" id="statLikes">–</div></div></div>
+  <div class="stat-card glow-card"><span class="stat-icon">👥</span><div><div class="stat-label">Total Users</div><div class="stat-value" id="statUsers">–</div></div></div>
+  <div class="stat-card glow-card"><span class="stat-icon">▶️</span><div><div class="stat-label">Videos Boosted</div><div class="stat-value" id="statVideos">–</div></div></div>
+  <div class="stat-card glow-card"><span class="stat-icon">❤️</span><div><div class="stat-label">Likes Delivered</div><div class="stat-value" id="statLikes">–</div></div></div>
+  <div class="stat-card glow-card"><span class="stat-icon">📶</span><div><div class="stat-label">On Board Now</div><div class="stat-value" id="statOnBoard">–</div></div></div>
 </div>
 
 <section class="panel" id="adminPanelSection" style="display:none;">
@@ -250,7 +308,9 @@
   </div>
   <div>
     <h4>Support</h4>
-    <a href="#">FAQ</a><a href="#">Help Center</a><a href="#">Contact Us</a>
+    <a href="#">FAQ</a><a href="#">Help Center</a>
+    <a href="https://chat.whatsapp.com/D8TfcqLy5h36wPmkJAVPrs?s=cl&p=a&ilr=1" target="_blank" rel="noopener noreferrer">Join WhatsApp Group</a>
+    <a href="https://wa.me/923125052877" target="_blank" rel="noopener noreferrer">WhatsApp: +92 312 5052877</a>
   </div>
 </footer>
 <div class="footer-bottom">
@@ -291,6 +351,8 @@
   </div>
 </div>
 
+<a href="https://wa.me/923125052877" target="_blank" rel="noopener noreferrer" style="position:fixed; bottom:24px; right:20px; width:56px; height:56px; background:#25D366; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 16px rgba(0,0,0,0.4); z-index:400;" title="Chat on WhatsApp">💬</a>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -298,6 +360,21 @@
     var b = document.getElementById('statusBanner');
     if (b) { b.style.display='block'; b.style.border = '1px solid #ff5c7a'; b.textContent = 'PAGE ERROR: ' + (e.message || 'unknown error'); }
   });
+  // floating particles
+  const field = document.getElementById('particleField');
+  const particleCount = window.innerWidth < 600 ? 14 : 28;
+  for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 2 + Math.random() * 4;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = Math.random() * 100 + 'vh';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    field.appendChild(p);
+  }
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -583,6 +660,7 @@ function initBoard(uid) {
   onValue(ref(db, 'videos'), (snapshot) => {
     currentVideos = snapshot.val() || {};
     renderBoard();
+    el('statOnBoard').textContent = Object.keys(currentVideos).length;
     statusBanner.style.display = 'none';
   }, (error) => {
     statusBanner.style.display = 'block';
