@@ -505,26 +505,26 @@ el('authToggleLink').addEventListener('click', () => {
   el('authError').style.display = 'none';
 });
 
-el('authSubmit').addEventListener('click', async () => {
-  const email = el('authEmail').value.trim();
-  const password = el('authPassword').value;
-  el('authError').style.display = 'none';
-  if (!email || !password) return;
+ const provider = new GoogleAuthProvider();
+
+el('googleLoginBtn').addEventListener('click', async () => {
   try {
-    if (isSignupMode) {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await set(ref(db, 'accounts/' + cred.user.uid), {
-        email, createdAt: Date.now(), subscriptionActive: false, subscriptionExpiry: 0
-      });
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    await set(ref(db, "accounts/" + user.uid), {
+      email: user.email,
+      createdAt: Date.now(),
+      subscriptionActive: false
+    });
+
     closeAuth();
   } catch (e) {
     el('authError').style.display = 'block';
     el('authError').textContent = e.message;
   }
 });
+            
 
 el('lockLogout').addEventListener('click', () => signOut(auth));
 el('appLogout').addEventListener('click', () => signOut(auth));
