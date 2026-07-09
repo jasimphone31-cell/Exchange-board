@@ -388,6 +388,29 @@ box-shadow:0 0 25px rgba(255,46,154,.5);">
     p.style.animationDuration = (6 + Math.random() * 10) + 's';
     p.style.animationDelay = (Math.random() * 8) + 's';
     field.appendChild(p);
+  }function verifyPayment(){
+
+const phone="923125052877";
+
+const msg=`Assalam-o-Alaikum
+
+I have paid my subscription.
+
+Name:
+
+Transaction ID:
+
+I am attaching my payment screenshot.
+
+Please activate my account.
+
+Thank you.`;
+
+window.open(
+"https://wa.me/"+phone+"?text="+encodeURIComponent(msg),
+"_blank"
+);
+
   }
 </script>
 <script type="module">
