@@ -388,11 +388,12 @@ box-shadow:0 0 25px rgba(255,46,154,.5);">
     p.style.animationDuration = (6 + Math.random() * 10) + 's';
     p.style.animationDelay = (Math.random() * 8) + 's';
     field.appendChild(p);
-  }function verifyPayment(){
+  }
+  function verifyPayment() {
 
-const phone="923125052877";
+  const phone = "923125052877";
 
-const msg=`Assalam-o-Alaikum
+  const msg = `Assalam-o-Alaikum
 
 I have paid my subscription.
 
@@ -406,10 +407,16 @@ Please activate my account.
 
 Thank you.`;
 
-window.open(
-"https://wa.me/"+phone+"?text="+encodeURIComponent(msg),
-"_blank"
-);
+  document.getElementById("txnStatus").innerHTML =
+  "⏳ Waiting for verification... Please wait. We will activate your subscription after checking your payment.";
+
+  document.getElementById("submitTxn").disabled = true;
+  document.getElementById("submitTxn").innerText = "Waiting for Verification...";
+
+  window.open(
+    "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
 
   }
 </script>
