@@ -7,6 +7,8 @@
 <meta name="description" content="JH Digital Service helps you grow your TikTok and YouTube videos through a fair like-exchange board. Exchange likes, earn passes, and promote your videos.">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff2e9a">
 <style>
   :root {
     --bg: #0c0716;
@@ -28,7 +30,8 @@
   @keyframes fadeInUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
   @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px rgba(255,46,154,0.25), 0 0 40px rgba(139,62,232,0.15); } 50% { box-shadow: 0 0 32px rgba(255,46,154,0.45), 0 0 60px rgba(139,62,232,0.3); } }
   @keyframes particleDrift { 0% { transform: translateY(0) translateX(0); opacity:0.6; } 50% { opacity:1; } 100% { transform: translateY(-140px) translateX(20px); opacity:0; } }
-  @keyframes textGlowPulse { 0%,100% { filter: drop-shadow(0 0 12px rgba(255,46,154,0.6)) drop-shadow(0 0 24px rgba(62,198,255,0.3)); } 50% { filter: drop-shadow(0 0 22px rgba(255,46,154,0.9)) drop-shadow(0 0 40px rgba(62,198,255,0.5)); } }
+  @keyframes welcomePop { 0% { transform: scale(0.7); opacity:0; } 60% { transform: scale(1.05); opacity:1; } 100% { transform: scale(1); } }
+  .welcome-pop { animation: welcomePop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 
   body {
     margin: 0;
@@ -49,6 +52,16 @@
   }
   .particle:nth-child(2n) { background: radial-gradient(circle, var(--blue), transparent 70%); }
   body > *:not(.particle-field) { position: relative; z-index: 1; }
+
+  body.light-mode {
+    --bg: #f5f2fb; --bg-2: #ffffff; --card: #ffffff; --card-2: #f0ebfa;
+    --line: #ddd3f0; --text: #241338; --muted: #6c5f8a;
+    background: radial-gradient(circle at 15% -5%, #e9d9fb 0%, transparent 45%),
+                radial-gradient(circle at 85% 10%, #d9e6fb 0%, transparent 40%),
+                #f5f2fb;
+  }
+  body.light-mode .glass-card { background: rgba(255,255,255,0.6); }
+  body.light-mode .stat-card, body.light-mode .panel-card, body.light-mode .badge-item { box-shadow: 0 2px 12px rgba(139,62,232,0.08); }
   a { text-decoration: none; color: inherit; }
   .grad-text {
     background: linear-gradient(90deg, var(--pink) 0%, var(--violet) 60%, var(--blue) 100%);
@@ -157,6 +170,9 @@
   .mini-progress-fill { height: 100%; background: linear-gradient(90deg,var(--pink),var(--blue)); box-shadow: 0 0 8px rgba(255,46,154,0.5); }
   .count-text { font-size: 12px; color: var(--muted); font-family: monospace; min-width: 44px; text-align: right; }
   .empty-row { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
+  #boardSearch { margin-bottom: 14px; }
+  .report-btn { background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.6; transition: opacity 0.2s ease; }
+  .report-btn:hover { opacity: 1; }
 
   form input {
     width: 100%; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px;
@@ -200,16 +216,6 @@
   .leader-rank { font-weight: 900; width: 26px; text-align: center; color: var(--pink-2); }
   .leader-email { flex: 1; }
   .leader-count { font-family: monospace; color: var(--muted); }
-
-  body.light-mode {
-    --bg: #f5f2fb; --bg-2: #ffffff; --card: #ffffff; --card-2: #f0ebfa;
-    --line: #ddd3f0; --text: #241338; --muted: #6c5f8a;
-    background: radial-gradient(circle at 15% -5%, #e9d9fb 0%, transparent 45%),
-                radial-gradient(circle at 85% 10%, #d9e6fb 0%, transparent 40%),
-                #f5f2fb;
-  }
-  body.light-mode .glass-card { background: rgba(255,255,255,0.6); }
-  body.light-mode .stat-card, body.light-mode .panel-card, body.light-mode .badge-item { box-shadow: 0 2px 12px rgba(139,62,232,0.08); }
 
   footer {
     max-width: 1100px; margin: 40px auto 0; padding: 34px 32px;
@@ -261,14 +267,17 @@
 <nav>
   <div class="brand"><img src="logo.png" alt="JH Digital Service" class="brand-logo"> JH DIGITAL SERVICE</div>
   <div class="nav-links">
-    <a href="#top">Home</a>
-    <a href="#board">Exchange</a>
-    <a href="#premium">Premium</a>
-    <a href="#footer">Contact</a>
+    <a href="#top" data-i18n="navHome">Home</a>
+    <a href="#board" data-i18n="navExchange">Exchange</a>
+    <a href="#addvideo" data-i18n="navPremium">Premium</a>
+    <a href="#" id="myActivityLink" style="display:none;" data-i18n="navActivity">My Activity</a>
+    <a href="#footer" data-i18n="navContact">Contact</a>
   </div>
-  <div style="display:flex; align-items:center; gap:10px;">
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <button class="btn-outline" id="langToggleBtn" title="Language">EN</button>
     <button class="btn-outline" id="themeToggleBtn" title="Toggle theme">🌙</button>
-    <button class="btn-outline" id="navAuthBtn">Login</button>
+    <button class="btn-outline" id="installBtn" style="display:none;">📲 Install App</button>
+    <button class="btn-outline" id="navAuthBtn" data-i18n="navLogin">Login</button>
   </div>
 </nav>
 
@@ -298,8 +307,14 @@
 </div>
 
 <section class="panel" id="adminPanelSection" style="display:none;">
-  <div class="panel-title">Pending Subscription Requests</div>
+  <div class="panel-title">📊 Analytics</div>
+  <div class="panel-card"><div id="analyticsGrid" class="stats-bar" style="max-width:none; margin:0; padding:0; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));"></div></div>
+  <div class="panel-title" style="margin-top:24px;">Pending Subscription Requests</div>
   <div class="panel-card"><div id="pendingList"></div></div>
+  <div class="panel-title" style="margin-top:24px;">🚩 Reported Links</div>
+  <div class="panel-card"><div id="reportsList"></div></div>
+  <div class="panel-title" style="margin-top:24px;">⭐ User Feedback</div>
+  <div class="panel-card"><div id="feedbackList"></div></div>
   <div class="panel-title" style="margin-top:24px;">Recent Likes (Spot-Check)</div>
   <div class="panel-card"><div id="recentLikesList"></div></div>
   <div class="panel-title" style="margin-top:24px;">All Users</div>
@@ -327,15 +342,16 @@
 </section>
 
 <section class="panel" id="board">
-  <div class="panel-title">On The Board <span id="adminBadge"></span></div>
+  <div class="panel-title" data-i18n="boardTitle">On The Board <span id="adminBadge"></span></div>
   <div class="panel-card">
     <div id="gateBoard" class="gate-box" style="display:none;"></div>
+    <input type="text" id="boardSearch" placeholder="🔍 Search links..." style="display:none;" />
     <div id="boardList" style="display:none;"></div>
   </div>
 </section>
 
-<section class="panel" id="premium">
-  <div class="panel-title">Add Your Video</div>
+<section class="panel" id="addvideo">
+  <div class="panel-title" data-i18n="addVideoTitle">Add Your Video</div>
   <div class="panel-card">
     <div id="gateForm" class="gate-box" style="display:none;"></div>
     <form id="submitForm" class="video-form-row" style="display:none;">
@@ -345,6 +361,16 @@
     <p class="hint" id="submitHint"></p>
     <p class="hint-note" id="formNote" style="display:none;">💡 Make sure your account is public for fast delivery.</p>
     <p style="margin-top:14px;"><span class="logout-link" id="appLogout" style="display:none;">Log out</span></p>
+  </div>
+</section>
+
+<section class="panel" id="feedbackSection" style="display:none;">
+  <div class="panel-title">⭐ Rate Your Experience</div>
+  <div class="panel-card">
+    <div id="starRating" style="font-size:26px; letter-spacing:6px; cursor:pointer; margin-bottom:12px;">☆☆☆☆☆</div>
+    <input type="text" id="feedbackMsg" placeholder="Any feedback? (optional)" />
+    <button class="btn-gradient" id="submitFeedbackBtn">Send Feedback</button>
+    <p class="hint" id="feedbackStatus"></p>
   </div>
 </section>
 
@@ -377,13 +403,6 @@
   <div class="panel-card center-card">
     <h1 style="font-size:20px; margin-top:0;">JH Digital Service</h1>
     <p class="hint" id="authTitle">Log in to continue</p>
-    <button id="googleLoginBtn" class="btn-gradient" style="width:100%;margin-bottom:15px;">
-  Continue with Google
-</button>
-
-<div style="text-align:center;color:#999;margin-bottom:15px;">
-  ─── OR ───
-</div>
     <input type="email" id="authEmail" placeholder="Email" />
     <input type="password" id="authPassword" placeholder="Password" />
     <div class="error-text" id="authError" style="display:none;"></div>
@@ -404,27 +423,39 @@
     <div style="background:var(--bg-2); border:1px dashed var(--violet); border-radius:10px; padding:14px; margin:16px 0; font-size:13px;">
       <b>Send 150 PKR to:</b><br>
       JazzCash: <span style="color:var(--pink-2)">0304-0599655</span><br>
-      <br><br>
-
-<img src="qr-code.jpg"
-style="width:220px;
-border-radius:15px;
-display:block;
-margin:15px auto;
-box-shadow:0 0 25px rgba(255,46,154,.5);">
       Account Name: <span style="color:var(--pink-2)">FIDH HUSSAIN</span>
     </div>
     <input type="text" id="txnId" placeholder="Transaction ID / TXN number" />
     <button class="btn-gradient" id="submitTxn" style="width:100%;">Submit for Approval</button>
-    <button
-  id="verifyWhatsappBtn"
-  class="btn-gradient"
-  onclick="verifyPayment()"
-  style="width:100%;">
-  📲 Verify Payment on WhatsApp
-    </button>
     <p class="hint" id="txnStatus"></p>
     <p style="margin-top:14px;"><span class="logout-link" id="lockLogout">Log out</span></p>
+  </div>
+</div>
+
+<div id="activityOverlay" class="modal-overlay">
+  <div class="panel-card center-card" style="max-width:480px;">
+    <h1 style="font-size:20px; margin-top:0;">📜 My Activity</h1>
+    <div id="activityList" style="max-height:320px; overflow-y:auto;"></div>
+    <p style="margin-top:14px;"><span class="logout-link" id="activityClose">Close</span></p>
+  </div>
+</div>
+
+<div id="reportOverlay" class="modal-overlay">
+  <div class="panel-card center-card">
+    <h1 style="font-size:20px; margin-top:0;">🚩 Report Link</h1>
+    <p class="hint">Why are you reporting this link?</p>
+    <input type="text" id="reportReason" placeholder="e.g. broken link, spam, adult content" />
+    <button class="btn-gradient" id="reportSubmitBtn" style="width:100%;">Submit Report</button>
+    <p style="margin-top:14px;"><span class="logout-link" id="reportClose">Cancel</span></p>
+  </div>
+</div>
+
+<div id="welcomeOverlay" class="modal-overlay">
+  <div class="panel-card center-card welcome-pop">
+    <div style="text-align:center; font-size:50px;" class="rocket-float">🚀</div>
+    <h1 style="font-size:22px; text-align:center;" class="neon-text grad-text">Welcome to JH Digital Service!</h1>
+    <p class="hint" style="text-align:center;">Your 7-day free trial has started. Like videos, earn passes, and get your own videos boosted. 🎉</p>
+    <button class="btn-gradient btn-hover-glow" id="welcomeCloseBtn" style="width:100%;">Let's Go 🚀</button>
   </div>
 </div>
 
@@ -452,57 +483,69 @@ box-shadow:0 0 25px rgba(255,46,154,.5);">
     p.style.animationDelay = (Math.random() * 8) + 's';
     field.appendChild(p);
   }
-  function verifyPayment() {
 
-  const phone = "923125052877";
-
-  const msg = `Assalam-o-Alaikum
-
-I have paid my subscription.
-
-Name:
-
-Transaction ID:
-
-I am attaching my payment screenshot.
-
-Please activate my account.
-
-Thank you.`;
-
-  document.getElementById("txnStatus").innerHTML =
-  "⏳ Waiting for verification... Please wait. We will activate your subscription after checking your payment.";
-
-  document.getElementById("verifyWhatsappBtn").disabled = true;
-  document.getElementById("verifyWhatsappBtn").innerText = "Waiting for Verification...";
-
-  window.open(
-    "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
-
+  // PWA: register service worker + install prompt
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
   }
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const btn = document.getElementById('installBtn');
+    if (btn) btn.style.display = 'inline-block';
+  });
+  document.getElementById('installBtn')?.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+  });
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged,
-  signOut
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getDatabase,
-  ref,
-  set,
-  push,
-  get,
-  update,
-  remove,
-  onValue,
-  runTransaction
+  getDatabase, ref, push, get, update, remove, onValue, runTransaction, set
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ---------- TRANSLATIONS ----------
+const translations = {
+  en: {
+    navHome: 'Home', navExchange: 'Exchange', navPremium: 'Premium', navActivity: 'My Activity', navContact: 'Contact', navLogin: 'Login',
+    boardTitle: 'On The Board', addVideoTitle: 'Add Your Video'
+  },
+  ur: {
+    navHome: 'ہوم', navExchange: 'ایکسچینج', navPremium: 'پریمیم', navActivity: 'میری سرگرمی', navContact: 'رابطہ', navLogin: 'لاگ ان',
+    boardTitle: 'بورڈ پر', addVideoTitle: 'اپنی ویڈیو شامل کریں'
+  }
+};
+let currentLang = localStorage.getItem('jh-lang') || 'en';
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('jh-lang', lang);
+  document.getElementById('langToggleBtn').textContent = lang === 'en' ? 'EN' : 'اردو';
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    const key = node.getAttribute('data-i18n');
+    const text = translations[lang][key];
+    if (text) {
+      // preserve any nested elements (like the admin badge span) by only replacing text node content
+      if (node.querySelector('span')) {
+        node.childNodes[0].textContent = text + ' ';
+      } else {
+        node.textContent = text;
+      }
+    }
+  });
+}
+document.getElementById('langToggleBtn').addEventListener('click', () => {
+  applyLang(currentLang === 'en' ? 'ur' : 'en');
+});
+applyLang(currentLang);
 
 const firebaseConfig = {
   apiKey: "AIzaSyAgiXTs87Yk_ObicjusvcaBy84NJUWwUyM",
@@ -520,7 +563,7 @@ const db = getDatabase(app);
 
 const LIKES_PER_PASS = 10;
 const LIKES_TO_GRADUATE = 10;
-const TRIAL_DAYS = 3;
+const TRIAL_DAYS = 7;
 const SUB_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const ADMIN_EMAIL = "jasimphone31@gmail.com";
@@ -565,6 +608,64 @@ el('getStartedBtn').addEventListener('click', () => {
   else document.getElementById('addvideo').scrollIntoView({behavior:'smooth'});
 });
 
+el('myActivityLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (!auth.currentUser) { openAuth(); return; }
+  renderActivityList(auth.currentUser.uid);
+  el('activityOverlay').classList.add('show');
+});
+el('activityClose').addEventListener('click', () => el('activityOverlay').classList.remove('show'));
+
+function renderActivityList(uid) {
+  const list = el('activityList');
+  list.innerHTML = '<div class="hint">Loading...</div>';
+  onValue(ref(db, 'history/' + uid), (snap) => {
+    const entries = Object.values(snap.val() || {}).sort((a, b) => b.timestamp - a.timestamp).slice(0, 40);
+    if (entries.length === 0) { list.innerHTML = '<div class="hint">No activity yet.</div>'; return; }
+    list.innerHTML = entries.map(e => `
+      <div class="row" style="padding:10px 2px;">
+        <span style="font-size:13px;">${e.text}</span>
+        <span class="hint" style="white-space:nowrap;">${new Date(e.timestamp).toLocaleString()}</span>
+      </div>
+    `).join('');
+  }, { onlyOnce: true });
+}
+
+let reportingVideoId = null;
+el('reportClose').addEventListener('click', () => el('reportOverlay').classList.remove('show'));
+el('reportSubmitBtn').addEventListener('click', async () => {
+  if (!reportingVideoId || !auth.currentUser) return;
+  const reason = el('reportReason').value.trim() || 'No reason given';
+  const video = currentVideos[reportingVideoId];
+  await push(ref(db, 'reports'), {
+    videoId: reportingVideoId, videoLink: video ? video.link : '', reason,
+    reportedBy: auth.currentUser.email, timestamp: Date.now()
+  });
+  el('reportReason').value = '';
+  el('reportOverlay').classList.remove('show');
+  showToast('Report submitted. Thank you!');
+});
+
+// ---------- FEEDBACK ----------
+let selectedStars = 0;
+el('starRating')?.addEventListener('click', (e) => {
+  const stars = '★★★★★'.split('');
+  const rect = el('starRating').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  selectedStars = Math.max(1, Math.min(5, Math.ceil(pct * 5)));
+  el('starRating').textContent = '★'.repeat(selectedStars) + '☆'.repeat(5 - selectedStars);
+});
+el('submitFeedbackBtn')?.addEventListener('click', async () => {
+  if (!auth.currentUser) { openAuth(); return; }
+  if (selectedStars === 0) { el('feedbackStatus').textContent = 'Please select a star rating first.'; return; }
+  await push(ref(db, 'feedback'), {
+    uid: auth.currentUser.uid, email: auth.currentUser.email, rating: selectedStars,
+    message: el('feedbackMsg').value.trim(), timestamp: Date.now()
+  });
+  el('feedbackStatus').textContent = 'Thank you for your feedback! 🎉';
+  el('feedbackMsg').value = '';
+});
+
 let isSignupMode = false;
 el('authToggleLink').addEventListener('click', () => {
   isSignupMode = !isSignupMode;
@@ -575,26 +676,34 @@ el('authToggleLink').addEventListener('click', () => {
   el('authError').style.display = 'none';
 });
 
- const provider = new GoogleAuthProvider();
-
-el('googleLoginBtn').addEventListener('click', async () => {
+el('authSubmit').addEventListener('click', async () => {
+  const email = el('authEmail').value.trim();
+  const password = el('authPassword').value;
+  el('authError').style.display = 'none';
+  if (!email || !password) return;
   try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    await set(ref(db, "accounts/" + user.uid), {
-      email: user.email,
-      createdAt: Date.now(),
-      subscriptionActive: false
-    });
-
-    closeAuth();
+    if (isSignupMode) {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await set(ref(db, 'accounts/' + cred.user.uid), {
+        email, createdAt: Date.now(), subscriptionActive: false, subscriptionExpiry: 0
+      });
+      await logActivity(cred.user.uid, 'Joined JH Digital Service — 7-day trial started');
+      closeAuth();
+      el('welcomeOverlay').classList.add('show');
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+      closeAuth();
+    }
   } catch (e) {
     el('authError').style.display = 'block';
     el('authError').textContent = e.message;
   }
 });
-            
+el('welcomeCloseBtn').addEventListener('click', () => el('welcomeOverlay').classList.remove('show'));
+
+async function logActivity(uid, text) {
+  try { await push(ref(db, 'history/' + uid), { text, timestamp: Date.now() }); } catch (e) {}
+}
 
 el('lockLogout').addEventListener('click', () => signOut(auth));
 el('appLogout').addEventListener('click', () => signOut(auth));
@@ -718,6 +827,71 @@ function setupAdminPanel() {
     await remove(ref(db, 'likeLog/' + log));
     showToast('Revoked');
   });
+
+  // Analytics
+  function renderAnalytics() {
+    const now = Date.now();
+    const accs = Object.values(accountsCache);
+    const activeCount = accs.filter(a => {
+      const trialEnd = (a.createdAt || 0) + TRIAL_DAYS * DAY_MS;
+      return now < trialEnd || (a.subscriptionActive && now < a.subscriptionExpiry);
+    }).length;
+    el('analyticsGrid').innerHTML = `
+      <div class="stat-card glow-card"><span class="stat-icon">👥</span><div><div class="stat-label">Total Users</div><div class="stat-value">${accs.length}</div></div></div>
+      <div class="stat-card glow-card"><span class="stat-icon">🟢</span><div><div class="stat-label">Active (trial/paid)</div><div class="stat-value">${activeCount}</div></div></div>
+      <div class="stat-card glow-card"><span class="stat-icon">🔗</span><div><div class="stat-label">Total Links Ever</div><div class="stat-value">${el('statVideos').textContent}</div></div></div>
+      <div class="stat-card glow-card"><span class="stat-icon">❤️</span><div><div class="stat-label">Likes Delivered</div><div class="stat-value">${el('statLikes').textContent}</div></div></div>
+    `;
+  }
+
+  // Reports
+  let reportsCache = {};
+  function renderReports() {
+    const list = el('reportsList');
+    const entries = Object.entries(reportsCache).sort((a, b) => b[1].timestamp - a[1].timestamp);
+    if (entries.length === 0) { list.innerHTML = '<div class="hint">No reports.</div>'; return; }
+    list.innerHTML = '';
+    entries.forEach(([id, r]) => {
+      const row = document.createElement('div');
+      row.className = 'req-row';
+      row.innerHTML = `
+        <span>${r.videoLink}<br><span class="hint">Reason: ${r.reason} — by ${r.reportedBy}</span></span>
+        <span style="display:flex; gap:6px;">
+          <button class="btn-outline" data-dismiss="${id}">Dismiss</button>
+          <button class="btn-outline" data-removevideo="${r.videoId}" data-reportid="${id}" style="border-color:var(--danger); color:var(--danger);">Remove Video</button>
+        </span>
+      `;
+      list.appendChild(row);
+    });
+  }
+  onValue(ref(db, 'reports'), (snap) => { reportsCache = snap.val() || {}; renderReports(); });
+  el('reportsList').addEventListener('click', async (e) => {
+    const dismissBtn = e.target.closest('button[data-dismiss]');
+    if (dismissBtn) { await remove(ref(db, 'reports/' + dismissBtn.dataset.dismiss)); return; }
+    const removeBtn = e.target.closest('button[data-removevideo]');
+    if (removeBtn) {
+      await remove(ref(db, 'videos/' + removeBtn.dataset.removevideo));
+      await remove(ref(db, 'reports/' + removeBtn.dataset.reportid));
+      showToast('Video removed.');
+    }
+  });
+
+  // Feedback
+  function renderFeedback(cache) {
+    const list = el('feedbackList');
+    const entries = Object.values(cache).sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
+    if (entries.length === 0) { list.innerHTML = '<div class="hint">No feedback yet.</div>'; return; }
+    list.innerHTML = entries.map(f => `
+      <div class="row" style="padding:10px 2px;">
+        <span style="font-size:13px;">${'★'.repeat(f.rating)}${'☆'.repeat(5-f.rating)} — ${f.email}${f.message ? '<br><span class="hint">' + f.message + '</span>' : ''}</span>
+      </div>
+    `).join('');
+  }
+  onValue(ref(db, 'feedback'), (snap) => renderFeedback(snap.val() || {}));
+
+  onValue(ref(db, 'accounts'), () => renderAnalytics());
+  onValue(ref(db, 'stats/videosBoosted'), () => renderAnalytics());
+  onValue(ref(db, 'stats/likesDelivered'), () => renderAnalytics());
 }
 
 // ---------- STATS (real, cumulative) ----------
@@ -744,12 +918,16 @@ function setGates(mode) {
   const achievements = el('achievementsSection');
   const dailyReward = el('dailyRewardSection');
   const leaderboard = el('leaderboardSection');
+  const myActivityLink = el('myActivityLink');
+  const feedbackSection = el('feedbackSection');
+  const boardSearch = el('boardSearch');
 
   if (mode === 'loggedOut') {
     navBtn.textContent = 'Login';
     gateBoard.style.display = 'block';
     gateBoard.innerHTML = '<p>Log in to view and join the exchange board.</p><button class="btn-gradient" id="gateLoginBtn1">Login / Sign Up</button>';
     boardList.style.display = 'none';
+    boardSearch.style.display = 'none';
     gateForm.style.display = 'block';
     gateForm.innerHTML = '<p>Log in to submit your video.</p><button class="btn-gradient" id="gateLoginBtn2">Login / Sign Up</button>';
     submitForm.style.display = 'none';
@@ -758,6 +936,8 @@ function setGates(mode) {
     achievements.style.display = 'none';
     dailyReward.style.display = 'none';
     leaderboard.style.display = 'none';
+    myActivityLink.style.display = 'none';
+    feedbackSection.style.display = 'none';
     el('trialTopbar').style.display = 'none';
     document.getElementById('gateLoginBtn1')?.addEventListener('click', openAuth);
     document.getElementById('gateLoginBtn2')?.addEventListener('click', openAuth);
@@ -766,6 +946,7 @@ function setGates(mode) {
     gateBoard.style.display = 'block';
     gateBoard.innerHTML = '<p>Your free trial has ended. Subscribe to keep viewing the board.</p><button class="btn-gradient" id="gateSubBtn1">Subscribe</button>';
     boardList.style.display = 'none';
+    boardSearch.style.display = 'none';
     gateForm.style.display = 'block';
     gateForm.innerHTML = '<p>Subscribe to submit videos.</p><button class="btn-gradient" id="gateSubBtn2">Subscribe</button>';
     submitForm.style.display = 'none';
@@ -774,12 +955,15 @@ function setGates(mode) {
     achievements.style.display = 'none';
     dailyReward.style.display = 'none';
     leaderboard.style.display = 'block';
+    myActivityLink.style.display = 'inline';
+    feedbackSection.style.display = 'none';
     document.getElementById('gateSubBtn1')?.addEventListener('click', openLock);
     document.getElementById('gateSubBtn2')?.addEventListener('click', openLock);
   } else {
     navBtn.textContent = 'Log out';
     gateBoard.style.display = 'none';
     boardList.style.display = 'block';
+    boardSearch.style.display = 'block';
     gateForm.style.display = 'none';
     submitForm.style.display = 'flex';
     appLogout.style.display = 'inline';
@@ -787,6 +971,8 @@ function setGates(mode) {
     achievements.style.display = 'block';
     dailyReward.style.display = 'block';
     leaderboard.style.display = 'block';
+    myActivityLink.style.display = 'inline';
+    feedbackSection.style.display = 'block';
     closeLock();
   }
 }
@@ -830,6 +1016,8 @@ let boardInitialized = false;
 let currentVideos = {};
 let myProgress = { likesGiven: 0, pointsSpent: 0 };
 let myId = null;
+let lastKnownPoints = null;
+let boardSearchTerm = '';
 const videoUnlockState = {};
 
 function initBoard(uid) {
@@ -892,6 +1080,11 @@ function initBoard(uid) {
   el('dailyRewardBtn').addEventListener('click', claimDailyReward);
   setInterval(renderDailyReward, 60000);
 
+  el('boardSearch').addEventListener('input', (e) => {
+    boardSearchTerm = e.target.value.trim().toLowerCase();
+    renderBoard();
+  });
+
   el('boardList').addEventListener('click', (e) => {
     const link = e.target.closest('a[data-open-id]');
     if (link) {
@@ -900,6 +1093,12 @@ function initBoard(uid) {
         videoUnlockState[id] = 'waiting';
         setTimeout(() => { videoUnlockState[id] = 'unlocked'; renderBoard(); }, 8000);
       }
+      return;
+    }
+    const reportBtn = e.target.closest('.report-btn');
+    if (reportBtn) {
+      reportingVideoId = reportBtn.dataset.id;
+      el('reportOverlay').classList.add('show');
       return;
     }
     const btn = e.target.closest('.tag-like');
@@ -925,8 +1124,9 @@ function initBoard(uid) {
 
     await push(ref(db, 'videos'), { link, likes: 0, likedBy: {}, addedBy: myId });
     await runTransaction(ref(db, 'stats/videosBoosted'), (n) => (n || 0) + 1);
+    await logActivity(myId, `🎉 Reward claimed! You listed a video: ${link}`);
     input.value = '';
-    showToast('Video added to the board.');
+    showToast('🎉 Reward claimed! Video added to the board.');
   });
 }
 
@@ -990,6 +1190,10 @@ function renderDailyReward() {
 
 function renderPass() {
   const pts = availablePoints();
+  if (typeof lastKnownPoints === 'number' && pts > lastKnownPoints) {
+    showToast('🎁 New pass earned! You can now list a video.');
+  }
+  lastKnownPoints = pts;
   el('pointsDisplay').textContent = pts;
   const inCycle = myProgress.likesGiven % LIKES_PER_PASS;
   el('progressText').textContent = `${inCycle} / ${LIKES_PER_PASS} likes given`;
@@ -1014,10 +1218,13 @@ function renderPass() {
 
 function renderBoard() {
   const board = el('boardList');
-  const entries = Object.entries(currentVideos);
+  let entries = Object.entries(currentVideos);
+  if (boardSearchTerm) {
+    entries = entries.filter(([id, v]) => (v.link || '').toLowerCase().includes(boardSearchTerm));
+  }
   board.innerHTML = '';
   if (entries.length === 0) {
-    board.innerHTML = '<div class="empty-row">Board is empty. Be the first to add a video.</div>';
+    board.innerHTML = `<div class="empty-row">${boardSearchTerm ? 'No links match your search.' : 'Board is empty. Be the first to add a video.'}</div>`;
     return;
   }
   entries.forEach(([id, v]) => {
@@ -1039,6 +1246,7 @@ function renderBoard() {
         ${tagHtml}
         <div class="mini-progress"><div class="mini-progress-fill" style="width:${pct}%"></div></div>
         <span class="count-text">${likes}/${LIKES_TO_GRADUATE}</span>
+        <button class="report-btn" data-id="${id}" title="Report this link">🚩</button>
       </div>
     `;
     board.appendChild(row);
@@ -1059,6 +1267,7 @@ async function handleLike(videoId) {
   await runTransaction(ref(db, 'users/' + myId + '/likesGiven'), (n) => (n || 0) + 1);
   await runTransaction(ref(db, 'stats/likesDelivered'), (n) => (n || 0) + 1);
   await push(ref(db, 'likeLog'), { uid: myId, videoId, videoLink: currentVideos[videoId] ? currentVideos[videoId].link : '', timestamp: Date.now() });
+  await logActivity(myId, `❤️ Liked a video: ${currentVideos[videoId] ? currentVideos[videoId].link : ''}`);
   const updatedVideo = result.snapshot.val();
   if (updatedVideo && updatedVideo.likes >= LIKES_TO_GRADUATE) {
     await remove(videoRef);
