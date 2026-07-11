@@ -701,6 +701,18 @@ el('submitTxn').addEventListener('click', async () => {
   el('txnId').value = '';
   el('txnId').disabled = true;
   el('submitTxn').disabled = true;
+  const message = `JH Digital Service Subscription Approval
+
+Email: ${user.email}
+Transaction ID: ${txn}
+Amount: 150 PKR
+
+Please verify my payment and approve my subscription.`;
+
+window.open(
+  "https://wa.me/923125052877?text=" + encodeURIComponent(message),
+  "_blank"
+);
 });
 
 // ---------- ADMIN ----------
