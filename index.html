@@ -718,20 +718,63 @@ window.open(
 // ---------- ADMIN ----------
 function renderPendingRequests(requests) {
   const list = el('pendingList');
-  const entries = Object.entries(requests).filter(([id, r]) => r.status === 'pending');
+  const entries = Object.entries(requests || {});
+
   if (entries.length === 0) {
     list.innerHTML = '<div class="hint">No pending requests.</div>';
     return;
   }
+
   list.innerHTML = '';
+
   entries.forEach(([id, r]) => {
     const row = document.createElement('div');
     row.className = 'req-row';
+
     row.innerHTML = `
-      <span>${r.email}<br><span class="hint">TXN: ${r.txnId}</span></span>
-      <button class="btn-gradient" data-id="${id}" data-uid="${r.uid}">Approve</button>
+      <span>
+        ${r.email}<br>
+        <span class="hint">TXN: ${r.txnId}</span>
+      </span>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn-gradient approve-btn" data-id="${id}">
+          Approve
+        </button>
+
+        <button class="reject-btn" data-id="${id}"
+          style="background:#ff2b70;color:white;border:none;
+          border-radius:12px;padding:12px 18px;font-weight:bold;">
+          Reject
+        </button>
+      </div>
     `;
+
     list.appendChild(row);
+  });
+
+  document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const r = requests[id];
+
+      await set(ref(db, 'subscriptions/' + r.uid), {
+        active: true,
+        approvedAt: Date.now()
+      });
+
+      await remove(ref(db, 'subscriptionRequests/' + id));
+    });
+  });
+
+  document.querySelectorAll('.reject-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+
+      if (!confirm('Reject this payment request?')) return;
+
+      await remove(ref(db, 'subscriptionRequests/' + id));
+    });
   });
 }
 
