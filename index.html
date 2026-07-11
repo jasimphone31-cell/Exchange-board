@@ -786,14 +786,35 @@ function setupAdminPanel() {
   el('adminPanelSection').style.display = 'block';
   onValue(ref(db, 'subscriptionRequests'), (snap) => renderPendingRequests(snap.val() || {}));
   el('pendingList').addEventListener('click', async (e) => {
-    const btn = e.target.closest('button[data-id]');
-    if (!btn) return;
-    await update(ref(db, 'accounts/' + btn.dataset.uid), {
-      subscriptionActive: true, subscriptionExpiry: Date.now() + SUB_DAYS * DAY_MS
+  const btn = e.target.closest('button[data-id]');
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+
+  const snap = await get(ref(db, 'subscriptionRequests/' + id));
+  if (!snap.exists()) return;
+
+  const req = snap.val();
+
+  // Approve
+  if (btn.classList.contains('approve-btn')) {
+    await update(ref(db, 'accounts/' + req.uid), {
+      subscriptionActive: true,
+      subscriptionExpiry: Date.now() + SUB_DAYS * DAY_MS
     });
-    await update(ref(db, 'subscriptionRequests/' + btn.dataset.id), { status: 'approved' });
+
+    await remove(ref(db, 'subscriptionRequests/' + id));
+
     showToast('Approved!');
-  });
+  }
+
+  // Reject
+  if (btn.classList.contains('reject-btn')) {
+    await remove(ref(db, 'subscriptionRequests/' + id));
+
+    showToast('Rejected!');
+  }
+});
 
   let accountsCache = {};
   let likeLogCache = {};
